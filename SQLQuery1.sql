@@ -1,4 +1,90 @@
+-- Tabelul LOCATII
+CREATE TABLE LOCATII (
+    id_locatie INT PRIMARY KEY,
+    oras VARCHAR(30) NOT NULL,
+    localitate VARCHAR(20) NOT NULL,
+    judet VARCHAR(30) NOT NULL
+);
 
+-- Tabelul CLIENTI
+CREATE TABLE CLIENTI (
+    id_client INT PRIMARY KEY,
+    nume VARCHAR(50) NOT NULL,
+    prenume VARCHAR(30) NOT NULL
+);
+
+-- Tabelul FACTURARI
+CREATE TABLE FACTURARI (
+    id_facturare INT PRIMARY KEY,
+    CUI VARCHAR(10) NOT NULL,
+    nume_firma VARCHAR(50) NOT NULL
+);
+
+-- Tabelul ADRESE
+CREATE TABLE ADRESE (
+    id_adresa INT PRIMARY KEY,
+    id_locatie INT NOT NULL,
+    id_client INT NOT NULL,
+    tip_adresa VARCHAR(20) NOT NULL,
+    strada VARCHAR(30) NOT NULL,
+    nr_strada VARCHAR(5) NOT NULL,
+    bloc VARCHAR(10),
+    nr_bloc VARCHAR(10),
+    FOREIGN KEY (id_locatie) REFERENCES LOCATII(id_locatie),
+    FOREIGN KEY (id_client) REFERENCES CLIENTI(id_client)
+);
+
+-- Tabelul VOUCHERE
+CREATE TABLE VOUCHERE (
+    id_voucher INT PRIMARY KEY,
+    reducere INT NOT NULL,
+    data_expirare DATETIME NOT NULL
+);
+
+-- Tabelul COMENZI
+CREATE TABLE COMENZI (
+    id_comanda INT PRIMARY KEY,
+    id_adresa_livrare INT NOT NULL,
+    id_adresa_facturare INT NOT NULL,
+    id_voucher INT,
+    id_facturare INT NOT NULL,
+    stare_comanda VARCHAR(20) NOT NULL,
+    data_emitere DATETIME NOT NULL,
+    FOREIGN KEY (id_adresa_livrare) REFERENCES ADRESE(id_adresa),
+    FOREIGN KEY (id_adresa_facturare) REFERENCES ADRESE(id_adresa),
+    FOREIGN KEY (id_voucher) REFERENCES VOUCHERE(id_voucher),
+    FOREIGN KEY (id_facturare) REFERENCES FACTURARI(id_facturare)
+);
+
+-- Tabelul PRODUSE
+CREATE TABLE PRODUSE (
+    id_produs INT PRIMARY KEY,
+    nume_produs VARCHAR(100) NOT NULL,
+    cod_produs VARCHAR(50) NOT NULL,
+    descriere VARCHAR(150),
+    stoc INT NOT NULL
+);
+
+-- Tabel intermediar PRODUSE_COMANDA
+CREATE TABLE PRODUSE_COMANDA (
+    id_produs_comanda INT IDENTITY(1,1) PRIMARY KEY,
+    id_produs INT NOT NULL,
+    id_comanda INT NOT NULL,
+    nr_bucati INT NOT NULL,
+    pret DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (id_produs) REFERENCES PRODUSE(id_produs),
+    FOREIGN KEY (id_comanda) REFERENCES COMENZI(id_comanda)
+);
+
+-- Alter Table Constraints
+ALTER TABLE ADRESE ADD CONSTRAINT FK_ADRESE_LOCATII FOREIGN KEY (id_locatie) REFERENCES LOCATII (id_locatie);
+ALTER TABLE ADRESE ADD CONSTRAINT FK_ADRESE_CLIENTI FOREIGN KEY (id_client) REFERENCES CLIENTI (id_client);
+ALTER TABLE COMENZI ADD CONSTRAINT FK_COMENZI_ADRESE_LIVRARE FOREIGN KEY (id_adresa_livrare) REFERENCES ADRESE (id_adresa);
+ALTER TABLE COMENZI ADD CONSTRAINT FK_COMENZI_ADRESE_FACTURARE FOREIGN KEY (id_adresa_facturare) REFERENCES ADRESE (id_adresa);
+ALTER TABLE COMENZI ADD CONSTRAINT FK_COMENZI_FACTURARI FOREIGN KEY (id_facturare) REFERENCES FACTURARI (id_facturare);
+ALTER TABLE COMENZI ADD CONSTRAINT FK_COMENZI_VOUCHERE FOREIGN KEY (id_voucher) REFERENCES VOUCHERE (id_voucher);
+ALTER TABLE PRODUSE_COMANDA ADD CONSTRAINT FK_PRODUSE_COMANDA_PRODUSE FOREIGN KEY (id_produs) REFERENCES PRODUSE (id_produs);
+ALTER TABLE PRODUSE_COMANDA ADD CONSTRAINT FK_PRODUSE_COMANDA_COMENZI FOREIGN KEY (id_comanda) REFERENCES COMENZI (id_comanda);
 
 -- INSERTURI PENTRU LOCATII
 INSERT INTO LOCATII (id_locatie, oras, localitate, judet) VALUES 
